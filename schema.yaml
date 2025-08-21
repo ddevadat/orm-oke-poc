@@ -1,0 +1,296 @@
+# Title shown in Application Information tab.
+title: Sample input variable schema
+# Sub Title shown in Application Information tab.
+description: Sample description...
+informationalText: Sample informational text to display in tab...
+schemaVersion: 1.1.0
+version: "20190304"
+
+# URL of Logo Icon used on Application Information tab. Logo must be 130x130 pixels.
+# (Optional)
+logoUrl: https://cloudmarketplace.oracle.com/marketplace/content?contentId=53066708
+
+# Used in Application Information tab to Hyperlink Title and Logo to the Marketplace
+# Listing.
+# Also used to link to Listing Usage section for "View Instructions".
+# (Optional) If it is missing, Application Information uses the
+# "marketplace-listing-id" tag for the same purpose.
+source:
+  type: marketplace
+  reference: 16132843
+
+locale: "en"
+variableGroups:
+  - title: "Basic Hidden"
+    variables:
+    - tenancy_ocid
+    - region
+    - user_ocid
+    visible: false
+
+  - title: "OKE Network Configuration"
+    variables:
+    - create_vcn
+    - oke_vcn_compartment_id
+    - vcn_cidrs
+    - vcn_id
+
+  - title: "OKE Cluster Configuration"
+    variables:
+    - oke_cluster_name
+    - oke_cluster_compartment_id
+    - oke_kubernetes_version
+    - oke_show_advanced_options
+    - oke_network_type
+    - oke_cluster_endpoint_visibility
+
+  - title: "OKE Node Pool Configuration"
+    variables:
+    - oke_create_multiple_node_pool
+    - oke_node_pool_name   
+    - oke_node_pool_size
+    - oke_node_pool_instance_shape
+    - oke_node_boot_volume_size
+    - oke_enable_node_pool   
+    - oke_node_pool_properties
+    - oke_ssh_private_key
+    - oke_ssh_public_key
+
+variables:
+  oke_cluster_compartment_id:
+    type: oci:identity:compartment:id
+    title: "OKE Cluster Compartment"
+    description: "The compartment where you want to create OKE cluster"
+    default: compartment_ocid
+    required: true
+
+  oke_cluster_name:
+    type: string
+    title: "OKE Cluster Name"
+    description: "Provide OKE cluster name"
+    default: "okecluster"
+    required: false
+    pattern: "^[A-Za-z0-9_-]{3,20}$"
+
+  oke_kubernetes_version:
+    type: oci:kubernetes:versions:id
+    title: "Kubernetes Version"
+    description: "Provide Kubernetes Version"
+    dependsOn:
+      compartmentId: oke_cluster_compartment_id
+      clusterOptionId: "all"
+    required: true
+    visible: true
+
+  oke_show_advanced_options:
+    type: boolean
+    default: false
+    title: "Advanced options"
+    description: "Shows advanced options for OKE"
+    visible: true
+
+  oke_network_type:
+    type: enum
+    enum:
+    - "Flannel"
+    - "VCN-native pod networking"
+    title: "OKE Network Type"
+    description: "Provide Network Type"
+    required: true
+    visible:
+      and:
+        - oke_show_advanced_options
+
+  oke_cluster_endpoint_visibility:
+    type: enum
+    enum:
+    - "Private"
+    - "Public"
+    default: "Private"
+    title: "Choose Kubernetes API Endpoint visibility type"
+    description: "Kubernetes API Endpoint visibility type"
+    required: true
+    visible:
+      and:
+        - oke_show_advanced_options
+
+  create_vcn:
+    type: boolean
+    title: "Create new VCN"
+    description: "Whether to create a Virtual Cloud Network for OKE Cluster"
+    required: false
+    visible: true
+
+  oke_vcn_compartment_id:
+    type: oci:identity:compartment:id
+    title: "OKE VCN Compartment"
+    description: "The compartment where you want to create OKE VCN"
+    default: compartment_ocid
+    required: true
+
+  vcn_cidrs:
+    type: array
+    items:
+      type: string
+    title: "List of VCN cidrs"
+    description: "The list of IPv4 CIDR blocks the VCN will use"
+    default: ["10.0.0.0/16"]
+    required: true
+    visible:
+      and:
+        - create_vcn
+
+  vcn_id:
+    type: oci:core:vcn:id
+    title: Existing VCN
+    description: An existing Virtual Cloud Network (VCN) where OKE Cluster will be provisioned"
+    dependsOn:
+      compartmentId: oke_vcn_compartment_id 
+    required: true
+    visible:
+      not:
+        - create_vcn
+
+  oke_create_multiple_node_pool:
+    type: boolean
+    default: false
+    title: "Create Multiple Node Pools"
+    description: "Whether to create more than one node pool for OKE cluster"
+    visible: true
+
+  # oke_node_pool_name:
+  #   type: string
+  #   title: "Node Pool Name"
+  #   description: "OKE Cluster Node Pool Name"
+  #   default: "nodepool-1"
+  #   required: false
+  #   pattern: "^[A-Za-z0-9-]+$"
+  #   visible:
+  #     and:
+  #       - eq:
+  #         - oke_node_pool_size
+  #         - 1
+
+  oke_node_pool_name:
+    type: string
+    title: "Node Pool Name"
+    description: "OKE Cluster Node Pool Name"
+    default: "nodepool-1"
+    required: false
+    pattern: "^[A-Za-z0-9-]+$"
+    visible:
+      not:
+        - oke_create_multiple_node_pool
+
+  oke_node_pool_size:
+    type: number
+    title: "OKE Cluster Node Pool Size"
+    description: "The number of nodes in the OKE cluster node pool"
+    default: 1
+    required: true
+    pattern: "^[0-9]+$"
+    visible:
+      not:
+        - oke_create_multiple_node_pool 
+
+  oke_node_pool_instance_shape:
+    type: oci:core:instanceshapewithflex:name
+    title: "Select a shape for the Worker Nodes instances"
+    required: true
+    dependsOn:
+      compartmentId: oke_cluster_compartment_id
+    visible:
+      not:
+        - oke_create_multiple_node_pool 
+
+  oke_node_boot_volume_size:
+    type: number
+    title: "Node pool boot volume size"
+    default: 50
+    required: true
+    minimum: 50
+    visible:
+      not:
+        - oke_create_multiple_node_pool 
+
+  oke_enable_node_pool:
+    type: boolean
+    default: true
+    title: "Create Node Pool"
+    description: "Whether to enable node pool for OKE cluster"
+    visible:
+      not:
+        - oke_create_multiple_node_pool
+
+  oke_node_pool_properties:
+    type: object
+    title: "OKE Node Pool Properties"
+    description: "Multiple Node pool properties"
+    default: |
+      {
+        "node-pools": {
+          "nodepool-1": {
+            "create": true,
+            "mode": "node-pool",
+            "size": 1,
+            "shape": "VM.Standard.E4.Flex",
+            "ocpus": 1,
+            "memory": 16,
+            "boot_volume_size": 50
+          },
+          "nodepool-2": {
+            "create": true,
+            "mode": "node-pool",
+            "size": 1,
+            "shape": "VM.Standard.E4.Flex",
+            "ocpus": 1,
+            "memory": 16,
+            "boot_volume_size": 50
+          }
+        }
+      }
+    visible:
+      and:
+        - oke_create_multiple_node_pool
+
+  oke_ssh_public_key:
+    title: SSH public key
+    description: Public SSH key for compute access.
+    # renders variable as an SSH key control
+    type: oci:core:ssh:publickey
+    additionalProps:
+      allowMultiple: true
+    required: true
+    default: []
+    pattern: "((^(ssh-rsa AAAAB3NzaC1yc2|ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNT|ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzOD|ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1Mj|ssh-ed25519 AAAAC3NzaC1lZDI1NTE5|ssh-dss AAAAB3NzaC1kc3)[0-9A-Za-z+\/]+[=]{0,3})( [^,]*)?)(,((ssh-rsa AAAAB3NzaC1yc2|ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNT|ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzOD|ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1Mj|ssh-ed25519 AAAAC3NzaC1lZDI1NTE5|ssh-dss AAAAB3NzaC1kc3)[0-9A-Za-z+\/]+[=]{0,3})( [^,]*)?)*$"
+
+  oke_ssh_private_key:
+    type: file
+    title: SSH private key
+    description: UPload ssh private key
+    required: true
+
+  # oke_cluster_properties:
+  #   type: object
+  #   title: "OKE Cluster Properties"
+  #   description: "OKE Cluster Properties"
+  #   default: |
+  #     {
+  #       "cluster_name": "blue",
+  #       "cni": "flannel",
+  #       "cluster_type": "enhanced",
+  #       "vcn_cidr": ["10.0.0.0/16"],
+  #       "bastion_allowed_cidrs": ["0.0.0.0/0"],
+  #       "control_plane_is_public": false,
+  #       "worker_pools": {
+  #         "housekeeping": {
+  #           "create": true,
+  #           "mode": "node-pool",
+  #           "size": 1,
+  #           "shape": "VM.Standard.E4.Flex",
+  #           "ocpus": 1,
+  #           "memory": 16,
+  #           "boot_volume_size": 50
+  #         }
+  #       }
+  #     }
