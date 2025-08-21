@@ -1,44 +1,23 @@
-*This repository acts as a template for all of Oracle’s GitHub repositories. It contains information about the guidelines for those repositories. All files and sections contained in this template are mandatory, and a GitHub app ensures alignment with these guidelines. To get started with a new repository, replace the italic paragraphs with the respective text for your project.*
+# terraform-orm-oke-poc
+This is a poc project to test devops workflow for orm stacks
 
-# Project name
 
-*Describe your project's features, functionality and target audience*
+## Deploy Using Oracle Resource Manager
 
-## Installation
+1. Click [![Deploy to Oracle Cloud](https://oci-resourcemanager-plugin.plugins.oci.oraclecloud.com/latest/deploy-to-oracle-cloud.svg)](https://cloud.oracle.com/resourcemanager/stacks/create?region=home&zipUrl=https://github.com/ddevadat/orm-oke-poc/releases/latest/download/terraform-oci-orm-oke-poc-stack-latest.zip)
 
-*Provide detailed step-by-step installation instructions. You can name this section **How to Run** or **Getting Started** instead of **Installation** if that's more acceptable for your project*
+    If you aren't already signed in, when prompted, enter the tenancy and user credentials.
 
-## Documentation
+2. Review and accept the terms and conditions.
 
-*Developer-oriented documentation can be published on GitHub, but all product documentation must be published on <https://docs.oracle.com>*
+3. Select the region where you want to deploy the stack.
 
-## Examples
+4. Follow the on-screen prompts and instructions to create the stack.
 
-*Describe any included examples or provide a link to a demo/tutorial*
+5. After creating the stack, click **Terraform Actions**, and select **Plan**.
 
-## Help
+6. Wait for the job to be completed, and review the plan.
 
-*Inform users on where to get help or how to receive official support from Oracle (if applicable)*
+    To make any changes, return to the Stack Details page, click **Edit Stack**, and make the required changes. Then, run the **Plan** action again.
 
-## Contributing
-
-*If your project has specific contribution requirements, update the CONTRIBUTING.md file to ensure those requirements are clearly explained*
-
-This project welcomes contributions from the community. Before submitting a pull request, please [review our contribution guide](./CONTRIBUTING.md)
-
-## Security
-
-Please consult the [security guide](./SECURITY.md) for our responsible security vulnerability disclosure process
-
-## License
-
-*The correct copyright notice format for both documentation and software is*
-    "Copyright (c) [year,] year Oracle and/or its affiliates."
-*You must include the year the content was first released (on any platform) and the most recent year in which it was revised*
-
-Copyright (c) 2023 Oracle and/or its affiliates.
-
-*Replace this statement if your project is not licensed under the UPL*
-
-Released under the Universal Permissive License v1.0 as shown at
-<https://oss.oracle.com/licenses/upl/>.
+7. If no further changes are necessary, return to the Stack Details page, click **Terraform Actions**, and select **Apply**. 
