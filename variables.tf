@@ -4,27 +4,32 @@ variable "region" { description = "Your tenancy region" }
 
 
 variable "oke_cluster_compartment_id" {
-  type = string
-  description  = "The compartment id where you want to create OKE cluster"
+  type        = string
+  description = "The compartment id where you want to create OKE cluster"
+}
+
+variable "oke_worker_compartment_id" {
+  type        = string
+  description = "The compartment id where you want to create OKE workers nodes"
 }
 
 variable "oke_vcn_compartment_id" {
-  type = string
-  description  = "The compartment id where you want to create OKE vcn"
+  type        = string
+  description = "The compartment id where you want to create OKE vcn"
 }
 
 variable "oke_cluster_name" {
-  type = string
+  type    = string
   default = "okecluster"
 }
 
 variable "oke_kubernetes_version" {
-  type = string
-  default = "Latest"
+  type    = string
+  default = "v1.33.1"
 }
 
 variable "oke_network_type" {
-  type = string
+  type    = string
   default = "Flannel"
 }
 
@@ -40,6 +45,12 @@ variable "oke_show_advanced_options" {
   type        = bool
 }
 
+variable "vcn_show_advanced_options" {
+  default     = false
+  description = "Show advanced option for vcn in ORM"
+  type        = bool
+}
+
 variable "vcn_id" {
   default     = null
   description = "Optional ID of existing VCN. Takes priority over vcn_name filter. Ignored when `create_vcn = true`."
@@ -50,6 +61,18 @@ variable "vcn_cidrs" {
   default     = ["10.0.0.0/16"]
   description = "The list of IPv4 CIDR blocks the VCN will use."
   type        = list(string)
+}
+
+variable "allow_rules_public_lb" {
+  default     = {}
+  description = "A map of additional rules to allow incoming traffic for public load balancers."
+  type        = any
+}
+
+variable "allow_rules_internal_lb" {
+  default     = {}
+  description = "A map of additional rules to allow incoming traffic for internal load balancers."
+  type        = any
 }
 
 variable "oke_cluster_endpoint_visibility" {
@@ -63,6 +86,27 @@ variable "oke_cluster_endpoint_visibility" {
 
 }
 
+variable "oke_cluster_type" {
+  default     = "basic"
+  description = "The cluster type. See <a href=https://docs.oracle.com/en-us/iaas/Content/ContEng/Tasks/contengworkingwithenhancedclusters.htm>Working with Enhanced Clusters and Basic Clusters</a> for more information."
+  type        = string
+  validation {
+    condition     = contains(["basic", "enhanced"], lower(var.oke_cluster_type))
+    error_message = "Accepted values are 'basic' or 'enhanced'."
+  }
+}
+
+variable "oke_allow_worker_ssh_access" {
+  default     = false
+  description = "Whether to allow SSH access to worker nodes."
+  type        = bool
+}
+
+variable "worker_image_os_version" {
+  default     = "8"
+  type        = string
+  description = "worker image os version"
+}
 
 variable "oke_create_multiple_node_pool" {
   default     = false
@@ -111,25 +155,23 @@ variable "oke_node_pool_instance_shape" {
 
 variable "oke_node_pool_properties" {
   default = {
-    node-pools = {
-      nodepool-1 = {
-        create           = true
-        mode             = "node-pool",
-        size             = 1,
-        shape            = "VM.Standard.E4.Flex",
-        ocpus            = 1,
-        memory           = 16,
-        boot_volume_size = 50,
-      }
-      nodepool-2 = {
-        create           = true
-        mode             = "node-pool",
-        size             = 1,
-        shape            = "VM.Standard.E4.Flex",
-        ocpus            = 1,
-        memory           = 16,
-        boot_volume_size = 50,
-      }
+    nodepool-1 = {
+      create           = true
+      mode             = "node-pool",
+      size             = 1,
+      shape            = "VM.Standard.E4.Flex",
+      ocpus            = 1,
+      memory           = 16,
+      boot_volume_size = 50,
+    }
+    nodepool-2 = {
+      create           = true
+      mode             = "node-pool",
+      size             = 1,
+      shape            = "VM.Standard.E4.Flex",
+      ocpus            = 1,
+      memory           = 16,
+      boot_volume_size = 50,
     }
   }
   description = "Default oke node properties properties"
@@ -137,16 +179,33 @@ variable "oke_node_pool_properties" {
 }
 
 variable "oke_ssh_private_key" {
-  type = string
-  description  = "The ssh private key for compute access"
+  type        = string
+  description = "The ssh private key for compute access"
 }
 
 variable "oke_ssh_public_key" {
-  type = string
-  description  = "The ssh public key for compute access"
+  type        = string
+  description = "The ssh public key for compute access"
+}
+
+variable "oke_cluster_freeform_tags" {
+  type        = map(string)
+  description = "Freeform tags applied to created resources."
+  default     = {}
 }
 
 
+variable "create_bastion" {
+  default     = false
+  description = "Whether to create a bastion host."
+  type        = bool
+}
+
+variable "create_operator" {
+  default     = false
+  description = "Whether to create an operator server in a private subnet."
+  type        = bool
+}
 # variable "oke_cluster_properties" {
 #   default = {
 #     cluster_name            = "blue"

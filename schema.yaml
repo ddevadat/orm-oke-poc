@@ -33,6 +33,9 @@ variableGroups:
     - oke_vcn_compartment_id
     - vcn_cidrs
     - vcn_id
+    - vcn_show_advanced_options
+    - allow_rules_public_lb
+    - allow_rules_internal_lb
 
   - title: "OKE Cluster Configuration"
     variables:
@@ -42,9 +45,13 @@ variableGroups:
     - oke_show_advanced_options
     - oke_network_type
     - oke_cluster_endpoint_visibility
+    - oke_cluster_type
+    - oke_allow_worker_ssh_access
+    - oke_cluster_freeform_tags
 
   - title: "OKE Node Pool Configuration"
     variables:
+    - oke_worker_compartment_id
     - oke_create_multiple_node_pool
     - oke_node_pool_name   
     - oke_node_pool_size
@@ -113,6 +120,37 @@ variables:
       and:
         - oke_show_advanced_options
 
+  oke_cluster_type:
+    type: enum
+    enum:
+    - "basic"
+    - "enhanced"
+    default: "enhanced"
+    title: "Choose oke cluster type"
+    required: true
+    visible:
+      and:
+        - oke_show_advanced_options
+
+  oke_allow_worker_ssh_access:
+    type: boolean
+    title: "Allow OKE worker node ssh access"
+    required: false
+    default: true
+    visible:
+      and:
+        - oke_show_advanced_options
+
+  oke_cluster_freeform_tags:
+    type: oci:identity:tag:value
+    title: "Freeform Tags"
+    required: false
+    default: {}
+    visible:
+      and:
+        - oke_show_advanced_options
+
+
   create_vcn:
     type: boolean
     title: "Create new VCN"
@@ -149,6 +187,39 @@ variables:
     visible:
       not:
         - create_vcn
+
+  vcn_show_advanced_options:
+    type: boolean
+    default: false
+    title: "Advanced options"
+    visible: true
+
+  allow_rules_public_lb:
+    type: object
+    title: "Security rules for public lb"
+    default: |
+      {
+      }
+    visible:
+      and:
+        - vcn_show_advanced_options
+
+  allow_rules_internal_lb:
+    type: object
+    title: "Security rules for private lb"
+    default: |
+      {
+      }
+    visible:
+      and:
+        - vcn_show_advanced_options
+
+  oke_worker_compartment_id:
+    type: oci:identity:compartment:id
+    title: "OKE Worker Compartment"
+    description: "The compartment where you want to create OKE worker Nodes"
+    default: compartment_ocid
+    required: true
 
   oke_create_multiple_node_pool:
     type: boolean
@@ -197,7 +268,7 @@ variables:
     title: "Select a shape for the Worker Nodes instances"
     required: true
     dependsOn:
-      compartmentId: oke_cluster_compartment_id
+      compartmentId: oke_worker_compartment_id
     visible:
       not:
         - oke_create_multiple_node_pool 
@@ -227,7 +298,6 @@ variables:
     description: "Multiple Node pool properties"
     default: |
       {
-        "node-pools": {
           "nodepool-1": {
             "create": true,
             "mode": "node-pool",
@@ -246,7 +316,6 @@ variables:
             "memory": 16,
             "boot_volume_size": 50
           }
-        }
       }
     visible:
       and:
@@ -299,10 +368,17 @@ outputGroups:
   - title: OKE Details
     outputs:
       - oke_cluster_name
+      - oke_kubernetes_version
 
 outputs:
   oke_cluster_name:
     type: string
     title: OKE cluster Name
     displayText: OKE Cluster Name
+    visible: true
+
+  oke_kubernetes_version:
+    type: string
+    title: OKE Kubernetes Version
+    displayText: OKE Kubernetes Version
     visible: true

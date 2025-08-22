@@ -1,0 +1,40 @@
+module "oke" {
+  source                     = "oracle-terraform-modules/oke/oci"
+  version                    = "5.3.2"
+  tenancy_id                 = var.tenancy_ocid
+  home_region                = local.oke_home_region
+  region                     = var.region
+  network_compartment_id     = var.oke_vcn_compartment_id
+  compartment_id             = var.oke_cluster_compartment_id
+  create_vcn                 = var.create_vcn
+  vcn_name                   = var.oke_cluster_name
+  vcn_cidrs                  = var.vcn_cidrs
+  vcn_id                     = var.vcn_id
+  cni_type                   = local.cni_type
+  cluster_name               = var.oke_cluster_name
+  cluster_type               = var.oke_cluster_type
+  kubernetes_version         = var.oke_kubernetes_version
+  control_plane_is_public    = local.control_plane_is_public
+  allow_worker_ssh_access    = var.oke_allow_worker_ssh_access
+  ssh_private_key            = var.oke_ssh_private_key
+  ssh_public_key             = var.oke_ssh_public_key
+  cluster_freeform_tags      = var.oke_cluster_freeform_tags
+  tag_namespace              = var.oke_cluster_name
+  create_bastion             = var.create_bastion
+  create_operator            = var.create_operator
+  worker_pools               = local.oke_worker_pools
+  state_id                   = var.oke_cluster_name
+  allow_rules_public_lb      = var.allow_rules_public_lb
+  allow_rules_internal_lb    = var.allow_rules_internal_lb
+  create_iam_resources       = true
+  create_iam_operator_policy = "always"
+  create_iam_worker_policy   = "always"
+  create_iam_defined_tags    = false
+  create_iam_tag_namespace   = false
+  worker_image_os_version    = var.worker_image_os_version
+  providers = {
+    oci      = oci.current_region
+    oci.home = oci.home_region
+  }
+
+}
