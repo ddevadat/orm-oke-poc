@@ -14,5 +14,14 @@ locals {
       boot_volume_size   = var.oke_node_boot_volume_size
     }
   }
-  oke_worker_pools = (var.oke_create_multiple_node_pool) ? var.oke_node_pool_properties : local.oke_worker_pool
+  oke_worker_pools         = (var.oke_create_multiple_node_pool) ? var.oke_node_pool_properties : local.oke_worker_pool
+  orm_private_ep_vcn_id    = (var.create_vcn) ? module.oke.vcn_id : var.vcn_id
+  orm_private_ep_subnet_id = (var.create_vcn) ? module.oke.control_plane_subnet_id : module.oke.control_plane_subnet_id
+  orm_private_ep_nsg_id    = (var.create_vcn) ? module.oke.control_plane_nsg_id : module.oke.control_plane_nsg_id
+  oke_ep_private_ip        = module.oke.apiserver_private_host
+  cluster_endpoint         = (var.oke_cluster_endpoint_visibility == "Private") ? "https://${module.rms-pe[0].private_ip}:6443" : module.oke.cluster_kubeconfig["clusters"][0]["cluster"]["server"]
+  cluster_ca_certificate   = base64decode(module.oke.cluster_kubeconfig["clusters"][0]["cluster"]["certificate-authority-data"])
+  cluster_id               = module.oke.cluster_kubeconfig["users"][0]["user"]["exec"]["args"][4]
+  cluster_region           = module.oke.cluster_kubeconfig["users"][0]["user"]["exec"]["args"][6]
+
 }

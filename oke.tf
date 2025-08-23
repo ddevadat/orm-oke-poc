@@ -32,6 +32,7 @@ module "oke" {
   create_iam_defined_tags    = false
   create_iam_tag_namespace   = false
   worker_image_os_version    = var.worker_image_os_version
+  output_detail              = "true"
   providers = {
     oci      = oci.current_region
     oci.home = oci.home_region
